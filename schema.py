@@ -7,5 +7,6 @@ Base = declarative_base()
 class ROAD_TYPE(Base):
     __tablename__="road_type"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
-    road_name = Column(VARCHAR, nullable=True)
-    road_type = Column(INT, nullable=True)
+    road_name = Column(VARCHAR, nullable=False)
+    road_type = Column(INT, nullable=False)
+    region = Column(VARCHAR, nullable=False)

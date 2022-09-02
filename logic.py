@@ -6,8 +6,12 @@ from loguru import logger
 import pandas as pd
 from db import engineconn
 from schema import ROAD_TYPE
+
+
 CHECK_INTERVAL = 5
 
+engine = engineconn()
+session = engine.session_maker()
 
 def check_road(lat : float, lon : float) -> str:
     request_url = "http://49.247.33.61:5000/nearest/v1/driving/"
@@ -63,23 +67,28 @@ def check_status(locations : List) -> dict:
 
 def read_csv():
     datasheet = pd.read_csv("C:\\Users\\user\\Documents\\Maptest\\utils\\road_type.csv");
-    df = datasheet.loc[:,['도로등급', '도로명']]
+    df = datasheet.loc[:,['도로등급', '도로명', '링크권역']]
     df = df.drop_duplicates()
     return df
 
 
 # !!!!!! before running this function you should do truncate table you use !!!!!!
 def migration_csv_to_sql():
-    engine = engineconn()
-    session = engine.session_maker()
+   
     data = read_csv()
     print("total data length - " + str(len(data)))
     for i in range(1, len(data)):
         d = data.iloc[i]
-        print(str(d['도로등급']) + str(d['도로명']))
-        session.add(ROAD_TYPE(road_name= d['도로명'], road_type= d['도로등급']))
+        print(str(d['도로등급']) + str(d['도로명'] )+ str(d['링크권역']))
+        session.add(ROAD_TYPE(road_name= d['도로명'], road_type= d['도로등급'], region= d['링크권역']))
         session.commit()
 
 
-    
-# migration_csv_to_sql()
+
+def query_road_type(road_name : str, region : str) -> int:
+    query = session.query(ROAD_TYPE).filter(ROAD_TYPE.road_name.like(road_name))
+    result = [i.road_type for i in query]
+    print(result)
+
+
+query_road_type("중앙로", "서울특별시")
