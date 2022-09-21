@@ -42,7 +42,6 @@ def on_road(locations: List) -> str:
 
 # 현재 속도 계산
 def calcSpeed(before: List, after: List) -> float:
-
     distance = calcDistance(before, after)
     distance *= 3600 / CHECK_INTERVAL
     return round(distance, 1)
@@ -73,7 +72,6 @@ def check_status(locations: List) -> dict:
     road_types = query_road_type(location, city)
     speed_limit = check_speed_limit(road_types, location)
     logger.debug("location : "+location+" city : "+city+" speed : "+str(speed)+"km/h speed-limit : " +str(speed_limit))
-
 
     return Road(location= location, city= city, speed= speed, speed_limit= speed_limit)
 

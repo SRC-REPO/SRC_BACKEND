@@ -6,3 +6,12 @@ class Road(BaseModel):
     city : str
     speed : float
     speed_limit : float
+
+
+class Balance(BaseModel):
+    wallet : str
+    sdt : int
+    smt : int
+    sol : int
+    usdc : int
+    

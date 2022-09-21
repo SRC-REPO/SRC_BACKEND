@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `user_info`;
 CREATE TABLE `user_info` (
   `idx` int NOT NULL AUTO_INCREMENT,
   `nick_name` varchar(30) NOT NULL,
-  `wallet` varchar(44) DEFAULT NULL,
+  `wallet` varchar(44) NOT NULL,
   PRIMARY KEY (`idx`),
   UNIQUE KEY `wallet` (`wallet`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

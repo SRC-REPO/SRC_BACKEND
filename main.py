@@ -25,4 +25,18 @@ def home():
 def check(locations: List):
     return check_status(locations)
 
+# 연결 
+@app.post("/connect")
+def connect():
+    return {"message": "connected"}
+# 게임 시작
+@app.post("/start")
+def start():
+    return {"message" : "game started"}
+
+
+# 게임 종료
+@app.post("/stop")
+def stop():
+    return {"message" : "game stopped"}
 
