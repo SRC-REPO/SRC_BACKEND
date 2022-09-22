@@ -16,29 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `smt_balances`
+-- Table structure for table `user_balance`
 --
 
-DROP TABLE IF EXISTS `smt_balances`;
+DROP TABLE IF EXISTS `user_balance`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `smt_balances` (
+CREATE TABLE `user_balance` (
   `idx` int NOT NULL AUTO_INCREMENT,
-  `wallet` varchar(44) NOT NULL,
-  `amount` int DEFAULT '0',
+  `wallet` varchar(45) NOT NULL,
+  `sdt` int NOT NULL DEFAULT '0',
+  `smt` int NOT NULL DEFAULT '0',
+  `sol` int NOT NULL DEFAULT '0',
+  `usdc` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`idx`),
   KEY `wallet` (`wallet`),
-  CONSTRAINT `smt_balances_ibfk_1` FOREIGN KEY (`wallet`) REFERENCES `user_info` (`wallet`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `user_balance_ibfk_1` FOREIGN KEY (`wallet`) REFERENCES `user_info` (`wallet`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `smt_balances`
+-- Dumping data for table `user_balance`
 --
 
-LOCK TABLES `smt_balances` WRITE;
-/*!40000 ALTER TABLE `smt_balances` DISABLE KEYS */;
-/*!40000 ALTER TABLE `smt_balances` ENABLE KEYS */;
+LOCK TABLES `user_balance` WRITE;
+/*!40000 ALTER TABLE `user_balance` DISABLE KEYS */;
+INSERT INTO `user_balance` VALUES (1,'BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa',0,0,0,0);
+/*!40000 ALTER TABLE `user_balance` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -50,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-12 17:30:05
+-- Dump completed on 2022-09-22 10:55:35

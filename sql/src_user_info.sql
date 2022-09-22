@@ -25,10 +25,10 @@ DROP TABLE IF EXISTS `user_info`;
 CREATE TABLE `user_info` (
   `idx` int NOT NULL AUTO_INCREMENT,
   `nick_name` varchar(30) NOT NULL,
-  `wallet` varchar(44) NOT NULL,
+  `wallet` varchar(45) NOT NULL,
   PRIMARY KEY (`idx`),
   UNIQUE KEY `wallet` (`wallet`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,6 +37,7 @@ CREATE TABLE `user_info` (
 
 LOCK TABLES `user_info` WRITE;
 /*!40000 ALTER TABLE `user_info` DISABLE KEYS */;
+INSERT INTO `user_info` VALUES (1,'deankang','BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa');
 /*!40000 ALTER TABLE `user_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-12 17:30:05
+-- Dump completed on 2022-09-22 10:55:36

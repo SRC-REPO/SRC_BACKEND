@@ -1,8 +1,9 @@
 from loguru import logger
 from db import engineconn
 from model import Balance
-from schema import SDT_BALANCES, USER_INFO, SMT_BALANCES, SOL_BALANCES, USDC_BALANCES, USER_SESSION
+from schema import USER_INFO, USER_SESSION, USER_BALANCE, ROAD_INFO
 from sqlalchemy.sql import text
+from sqlalchemy import update
 engine = engineconn()
 session = engine.session_maker()
 
@@ -33,13 +34,7 @@ def create_user(_nick_name: str, _wallet: str) -> bool:
 
 # 잔고 초기화
 def create_balances(_wallet: str) -> bool:
-    session.add(SDT_BALANCES(wallet=_wallet, amount=0))
-    session.commit()
-    session.add(SMT_BALANCES(wallet=_wallet, amount=0))
-    session.commit()
-    session.add(SOL_BALANCES(wallet=_wallet, amount=0))
-    session.commit()
-    session.add(USDC_BALANCES(wallet=_wallet, amount=0))
+    session.add(USER_BALANCE(wallet=_wallet, sdt = 0, smt = 0, sol = 0, usdc =0))
     session.commit()
 
     return True
@@ -49,19 +44,34 @@ def create_balances(_wallet: str) -> bool:
 def create_session(_wallet: str, _session: str) -> bool:
     session.add(USER_SESSION(user=_wallet, session=_session))
     session.commit()
-
     return True
 
 
 # 유저 잔고 조회
-def query_user_balance(_wallet: str) -> Balance:
-    result = session.query(text("wallet"), text("sdt"), text("smt"), text("sol"), text("usdc")).from_statement(text(
-        "select b.wallet, b.sdt, b.smt, b.sol, usdc.amount as usdc from (select a.wallet, a.sdt, a.smt, sol.amount as sol from (select sdt.wallet, sdt.amount as sdt, smt.amount as smt from sdt_balances as sdt inner join smt_balances as smt) as a inner join sol_balances as sol) as b inner join usdc_balances as usdc;")).all()
+def query_user_balance(_wallet: str) -> None:
+    result = session.query(USER_BALANCE).filter(USER_BALANCE.wallet == _wallet).all()
+    result = [(r.wallet, r.sdt, r.smt, r.sol, r.usdc) for r in result][0]
+    balance = Balance(wallet = result[0], sdt = result[1], smt = result[2], sol = result[3], usdc = result[4])
 
-    return Balance(wallet=result[0][0], sdt=result[0][1], smt=result[0][2], sol=result[0][3], usdc=result[0][4])
+    return balance
 
 
+
+
+# def update_speed_limit():
+#     road_infos = session.query(ROAD_INFO).all()
+
+#     for road in road_infos:
+#         road_type = road.road_type
+#         if road_type == 101:
+#             road.speed_limit = 100
+#         elif road_type == 102:
+#             road.speed_limit = 80
+#         else :
+#             road.speed_limit = 50
+#     session.commit()
 # create_user("deankang", "BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa")
 # create_balances("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa")
-balance = query_user_balance("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa")
-print(balance)
+# print(query_user_balance("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa"))
+
+# update_speed_limit()

@@ -10,6 +10,7 @@ class ROAD_INFO(Base):
     road_name = Column(VARCHAR, nullable=False)
     road_type = Column(INT, nullable=False)
     region = Column(VARCHAR, nullable=False)
+    speed_limit = Column(INT, nullable=True)
 
 
 class CHILD_PROTECTION_ROAD(Base):
@@ -25,39 +26,20 @@ class USER_INFO(Base):
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
     nick_name = Column(VARCHAR, nullable=False)
     wallet = Column(VARCHAR, nullable=False)
-    sdt = relationship("SDT_BALANCES")
-    smt = relationship("SMT_BALANCES")
-    sol = relationship("SOL_BALANCES")
-    usdc = relationship("USDC_BALANCES")
+    balance = relationship("USER_BALANCE")
     session = relationship("USER_SESSION")
 
 
-class SDT_BALANCES(Base):
-    __tablename__ = "sdt_balances"
+class USER_BALANCE(Base):
+    __tablename__ = "user_balance"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
     wallet = Column(VARCHAR,  ForeignKey("user_info.wallet"))
-    amount = Column(INT, nullable=True)
+    sdt = Column(INT, nullable=False )
+    smt = Column(INT, nullable=False)
+    sol = Column(INT, nullable=False)
+    usdc = Column(INT, nullable=False)
 
 
-class SMT_BALANCES(Base):
-    __tablename__ = "smt_balances"
-    idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
-    wallet = Column(VARCHAR,  ForeignKey("user_info.wallet", onupdate="CASCADE", ondelete="CASCADE"))
-    amount = Column(INT, nullable=True)
-
-
-class SOL_BALANCES(Base):
-    __tablename__ = "sol_balances"
-    idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
-    wallet = Column(VARCHAR,  ForeignKey("user_info.wallet",onupdate="CASCADE", ondelete="CASCADE"))
-    amount = Column(INT, nullable=True)
-
-
-class USDC_BALANCES(Base):
-    __tablename__ = "usdc_balances"
-    idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
-    wallet = Column(VARCHAR,  ForeignKey("user_info.wallet", onupdate="CASCADE", ondelete="CASCADE"))
-    amount = Column(INT, nullable=True)
 
 
 class USER_SESSION(Base):

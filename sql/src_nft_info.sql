@@ -27,7 +27,7 @@ CREATE TABLE `nft_info` (
   `collection` varchar(30) NOT NULL,
   `number` int NOT NULL,
   `rarity` varchar(20) NOT NULL,
-  `owner` varchar(44) DEFAULT NULL,
+  `owner` varchar(45) DEFAULT NULL,
   `max_durability` int NOT NULL,
   `current_durability` float(3,1) DEFAULT NULL,
   PRIMARY KEY (`idx`),
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-12 17:30:05
+-- Dump completed on 2022-09-22 10:55:35
