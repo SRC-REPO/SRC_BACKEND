@@ -29,11 +29,12 @@ CREATE TABLE `nft_info` (
   `rarity` varchar(20) NOT NULL,
   `owner` varchar(45) DEFAULT NULL,
   `max_durability` int NOT NULL,
-  `current_durability` float(3,1) DEFAULT NULL,
+  `current_durability` int NOT NULL,
+  `equip` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`idx`),
   KEY `owner` (`owner`),
   CONSTRAINT `nft_info_ibfk_1` FOREIGN KEY (`owner`) REFERENCES `user_info` (`wallet`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,6 +43,7 @@ CREATE TABLE `nft_info` (
 
 LOCK TABLES `nft_info` WRITE;
 /*!40000 ALTER TABLE `nft_info` DISABLE KEYS */;
+INSERT INTO `nft_info` VALUES (1,'test',1,'common','BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa',100,100,1);
 /*!40000 ALTER TABLE `nft_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-22 10:55:35
+-- Dump completed on 2022-09-23 13:14:27

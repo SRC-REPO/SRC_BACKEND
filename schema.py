@@ -1,4 +1,4 @@
-from sqlalchemy import Column, VARCHAR, INT, ForeignKey
+from sqlalchemy import Column, VARCHAR, INT, ForeignKey, BOOLEAN, FLOAT
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -11,6 +11,7 @@ class ROAD_INFO(Base):
     road_type = Column(INT, nullable=False)
     region = Column(VARCHAR, nullable=False)
     speed_limit = Column(INT, nullable=True)
+
 
 
 class CHILD_PROTECTION_ROAD(Base):
@@ -28,6 +29,18 @@ class USER_INFO(Base):
     wallet = Column(VARCHAR, nullable=False)
     balance = relationship("USER_BALANCE")
     session = relationship("USER_SESSION")
+    nft_info = relationship("NFT_INFO")
+    drive_record = relationship("DRIVE_RECORD")
+class NFT_INFO(Base):
+    __tablename__ = "nft_info"
+    idx = Column(INT, nullable = False, autoincrement = True, primary_key = True)
+    collection = Column(VARCHAR, nullable = False)
+    number = Column(INT, nullable = False)
+    rarity = Column(VARCHAR, nullable = False)
+    owner = Column(VARCHAR, ForeignKey("user_info.wallet"), nullable = True)
+    max_durability = Column(INT, nullable = False)
+    current_durability = Column(INT, nullable = False)
+    equip = Column(BOOLEAN, nullable = True)
 
 
 class USER_BALANCE(Base):
@@ -39,11 +52,22 @@ class USER_BALANCE(Base):
     sol = Column(INT, nullable=False)
     usdc = Column(INT, nullable=False)
 
+class DRIVE_RECORD(Base):
+    __tablename__ = "drive_record"
+    idx = Column(INT, nullable = False, autoincrement = True, primary_key = True)
+    user = Column(VARCHAR, ForeignKey("user_info.wallet"), nullable = False)
+    start_at = Column(INT, nullable = False)
+    end_at = Column(INT, nullable = True)
+    driving_distance  = Column(FLOAT, nullable = False)
+    safe_driving_distance = Column(FLOAT, nullable = False)
+    mining_distance = Column(FLOAT, nullable = False)
+    total_mining = Column(FLOAT, nullable = False)
+    running_time = Column(INT, nullable = False)
 
 
 
 class USER_SESSION(Base):
     __tablename__ = "user_session"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
-    user = Column(VARCHAR, ForeignKey("user_info.wallet", onupdate="CASCADE", ondelete="CASCADE"))
+    user = Column(VARCHAR, ForeignKey("user_info.wallet"))
     session = Column(VARCHAR, nullable = True)

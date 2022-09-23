@@ -4,16 +4,22 @@ import requests
 from typing import List
 from loguru import logger
 from db import engineconn
-from schema import ROAD_INFO
+from schema import ROAD_INFO, NFT_INFO, DRIVE_RECORD
 from sqlalchemy.sql import text
 from model import Road
+from fastapi import HTTPException
+from enum import Enum
+import time
 
-CHECK_INTERVAL = 5
+CHECK_INTERVAL = 2
 # ROAD_RANK = {101: ("고속도로", 100), 102: ("도시고속화도로", 80), 103: ("일반국도", 50),
 #              104: ("특별/광역시도", 50), 105: ("국가지원지방도", 50), 106: ("지방도", 50), 107: ("시군도", 50)}
 
 engine = engineconn()
 session = engine.session_maker()
+
+
+Rarity = {"common" : 1, "rare" : 1.3, "unique" : 1.5, "legend" : 1.7}
 
 
 
@@ -113,9 +119,70 @@ def check_city(lat : float, lon : float) -> str:
     url_param = "lon=" + str(lon) +"&lat="+str(lat)
     response = requests.get(request_url + url_param).json()
     return response['address']['city']
+    
+
+def get_unix_time_stamp() -> int:
+    return round(time.time())
+
+# 현재 진행 중인 게임이 있는지 확인
+def check_running_game(_wallet : str) -> None:
+    query = session.query(DRIVE_RECORD).filter(DRIVE_RECORD.user == _wallet).filter(DRIVE_RECORD.start_at < get_unix_time_stamp()).filter(DRIVE_RECORD.end_at == None).all()
+    r = [(q.start_at, q.end_at) for q in query]
+    if len(r) > 0 :
+        raise HTTPException(status_code = 405, detail="ALREADY RUNNING GAME")
+
+# 게임 시작 
+def start_game(_wallet : str) -> bool:
+    check_running_game(_wallet) # 게임 진행중인지 체크 
+    dr = DRIVE_RECORD(user = _wallet, start_at = get_unix_time_stamp(), end_at = None, driving_distance = 0, safe_driving_distance = 0, mining_distance = 0, total_mining =0, running_time = 0)
+    session.add(dr)
+    session.commit()    
+    return True
+
+# 게임이 진행 중 일 때 지속적으로 테이블 업데이트
+def update_record(_wallet : str, _current_speed : float, _speed_limit : float ,_start_date_time : int, _driving_distance : float, _safe_driving_distance : float, _mining_distance : float):
+    mining_amount = calc_mining(_wallet, _driving_distance, _current_speed, _speed_limit)
+    violation = is_violate(_current_speed, _speed_limit)
+    
+    query = session.query(DRIVE_RECORD).filter(DRIVE_RECORD.user == _wallet).filter(DRIVE_RECORD.start_at == _start_date_time).filter(DRIVE_RECORD.end_at == None).all()
+    for q in query:
+        q.driving_distance += _driving_distance
+        q.safe_driving_distance += _safe_driving_distance if violation == 1 else 0
+        q.mining_distance += _mining_distance if violation == 1 else 0
+        q.total_mining += mining_amount
+    session.commit()
         
-
-
     
 
 
+def get_equipped_nft_info(_wallet : str) -> (float, float):
+    query = session.query(NFT_INFO).filter(NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == 1).all()
+    result = [(q.rarity,q.max_durability, q.current_durability )for q in query]
+    rr = Rarity[result[0][0]]
+    mx = result[0][1]
+    cr = result[0][2]
+    if len(result) == 0:
+        raise HTTPException(status_code=404, detail="NFT NOT FOUND")
+
+    return (rr, cr / mx)
+
+def is_violate( current_speed : float, speed_limit : float) -> int:
+    
+    return 1 if current_speed <= speed_limit else 0
+
+# calc mining amount 
+def calc_mining(_wallet : str, _distance : float, _current_speed : float, _speed_limit : float) -> float():
+    mining_rate = 1 # per km
+    c = 1
+    adj, durability = get_equipped_nft_info(_wallet) # td
+    v = is_violate(current_speed, speed_limit)
+    
+    return pow((mining_rate * _distance), c) * durability * v * adj
+
+
+# dr = DRIVE_RECORD(user = "BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa", start_at = get_unix_time_stamp(), end_at = None, driving_distance = 0, safe_driving_distance = 0, mining_distance = 0, total_mining =0, running_time = 0)
+# session.add(dr)
+# session.commit()
+
+
+update_record("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa",1663904375)

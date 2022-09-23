@@ -25,8 +25,8 @@ DROP TABLE IF EXISTS `drive_record`;
 CREATE TABLE `drive_record` (
   `idx` int NOT NULL AUTO_INCREMENT,
   `user` varchar(44) NOT NULL,
-  `start_at` datetime NOT NULL,
-  `end_at` datetime NOT NULL,
+  `start_at` int NOT NULL,
+  `end_at` int DEFAULT NULL,
   `driving_distance` float(6,1) NOT NULL,
   `safe_driving_distance` float(6,1) NOT NULL,
   `mining_distance` float(6,1) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `drive_record` (
   PRIMARY KEY (`idx`),
   KEY `user` (`user`),
   CONSTRAINT `drive_record_ibfk_1` FOREIGN KEY (`user`) REFERENCES `user_info` (`wallet`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,6 +44,7 @@ CREATE TABLE `drive_record` (
 
 LOCK TABLES `drive_record` WRITE;
 /*!40000 ALTER TABLE `drive_record` DISABLE KEYS */;
+INSERT INTO `drive_record` VALUES (1,'BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa',1663904375,NULL,0.0,0.0,0.0,0.0,0);
 /*!40000 ALTER TABLE `drive_record` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-22 10:55:36
+-- Dump completed on 2022-09-23 13:14:28
