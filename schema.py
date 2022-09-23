@@ -39,7 +39,7 @@ class NFT_INFO(Base):
     rarity = Column(VARCHAR, nullable = False)
     owner = Column(VARCHAR, ForeignKey("user_info.wallet"), nullable = True)
     max_durability = Column(INT, nullable = False)
-    current_durability = Column(INT, nullable = False)
+    current_durability = Column(FLOAT, nullable = False)
     equip = Column(BOOLEAN, nullable = True)
 
 
