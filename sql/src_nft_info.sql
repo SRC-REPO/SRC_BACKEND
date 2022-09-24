@@ -29,7 +29,7 @@ CREATE TABLE `nft_info` (
   `rarity` varchar(20) NOT NULL,
   `owner` varchar(45) DEFAULT NULL,
   `max_durability` int NOT NULL,
-  `current_durability` int NOT NULL,
+  `current_durability` float(6,3) NOT NULL,
   `equip` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`idx`),
   KEY `owner` (`owner`),
@@ -43,7 +43,7 @@ CREATE TABLE `nft_info` (
 
 LOCK TABLES `nft_info` WRITE;
 /*!40000 ALTER TABLE `nft_info` DISABLE KEYS */;
-INSERT INTO `nft_info` VALUES (1,'test',1,'common','BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa',100,100,1);
+INSERT INTO `nft_info` VALUES (1,'test',1,'common','BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa',100,99.838,1);
 /*!40000 ALTER TABLE `nft_info` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-23 13:14:27
+-- Dump completed on 2022-09-24 15:48:55

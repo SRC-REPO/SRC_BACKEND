@@ -31,6 +31,8 @@ class USER_INFO(Base):
     session = relationship("USER_SESSION")
     nft_info = relationship("NFT_INFO")
     drive_record = relationship("DRIVE_RECORD")
+    drive_history= relationship("DRIVE_HISTORY")
+
 class NFT_INFO(Base):
     __tablename__ = "nft_info"
     idx = Column(INT, nullable = False, autoincrement = True, primary_key = True)
@@ -63,7 +65,23 @@ class DRIVE_RECORD(Base):
     mining_distance = Column(FLOAT, nullable = False)
     total_mining = Column(FLOAT, nullable = False)
     running_time = Column(INT, nullable = False)
+    nft_rarity = Column(VARCHAR,nullable = False)
+    nft_usage = Column(FLOAT, nullable= False)
 
+
+class DRIVE_HISTORY(Base):
+    __tablename__ = "drive_history"
+    idx = Column(INT, nullable = False, autoincrement = True, primary_key = True)
+    user = Column(VARCHAR, ForeignKey("user_info.wallet"), nullable = False)
+    start_at = Column(INT, nullable = False)
+    end_at = Column(INT, nullable = True)
+    driving_distance  = Column(FLOAT, nullable = False)
+    safe_driving_distance = Column(FLOAT, nullable = False)
+    mining_distance = Column(FLOAT, nullable = False)
+    total_mining = Column(FLOAT, nullable = False)
+    running_time = Column(INT, nullable = False)
+    nft_rarity = Column(VARCHAR,nullable = False)
+    nft_usage = Column(FLOAT, nullable= False)
 
 
 class USER_SESSION(Base):

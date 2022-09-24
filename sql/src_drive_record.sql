@@ -27,11 +27,13 @@ CREATE TABLE `drive_record` (
   `user` varchar(44) NOT NULL,
   `start_at` int NOT NULL,
   `end_at` int DEFAULT NULL,
-  `driving_distance` float(6,1) NOT NULL,
-  `safe_driving_distance` float(6,1) NOT NULL,
-  `mining_distance` float(6,1) NOT NULL,
-  `total_mining` float(4,1) NOT NULL,
+  `driving_distance` float(8,3) NOT NULL,
+  `safe_driving_distance` float(8,3) NOT NULL,
+  `mining_distance` float(8,3) NOT NULL,
+  `total_mining` float(6,3) NOT NULL,
   `running_time` int NOT NULL,
+  `nft_rarity` varchar(30) NOT NULL,
+  `nft_usage` float(6,3) NOT NULL,
   PRIMARY KEY (`idx`),
   KEY `user` (`user`),
   CONSTRAINT `drive_record_ibfk_1` FOREIGN KEY (`user`) REFERENCES `user_info` (`wallet`)
@@ -44,7 +46,6 @@ CREATE TABLE `drive_record` (
 
 LOCK TABLES `drive_record` WRITE;
 /*!40000 ALTER TABLE `drive_record` DISABLE KEYS */;
-INSERT INTO `drive_record` VALUES (1,'BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa',1663904375,NULL,0.0,0.0,0.0,0.0,0);
 /*!40000 ALTER TABLE `drive_record` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -57,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-09-23 13:14:28
+-- Dump completed on 2022-09-24 15:48:54

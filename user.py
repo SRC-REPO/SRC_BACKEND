@@ -50,8 +50,11 @@ def create_session(_wallet: str, _session: str) -> bool:
 # 유저 잔고 조회
 def query_user_balance(_wallet: str) -> Balance:
     result = session.query(USER_BALANCE).filter(USER_BALANCE.wallet == _wallet).all()
-    result = [(r.wallet, r.sdt, r.smt, r.sol, r.usdc) for r in result][0]
-    balance = Balance(wallet = result[0], sdt = result[1], smt = result[2], sol = result[3], usdc = result[4])
+    if len(result) == 0:
+        raise HTTPException(404, "NO USER FOUND")
+    
+    [r] = result
+    balance = Balance(wallet = r.wallet, sdt = r.sdt, smt = r.smt, sol = r.sol, usdc = r.usdc)
 
     return balance
 
