@@ -4,6 +4,7 @@ from model import Balance
 from schema import USER_INFO, USER_SESSION, USER_BALANCE, ROAD_INFO
 from sqlalchemy.sql import text
 from sqlalchemy import update
+from fastapi import HTTPException
 engine = engineconn()
 session = engine.session_maker()
 
@@ -57,24 +58,3 @@ def query_user_balance(_wallet: str) -> Balance:
     balance = Balance(wallet = r.wallet, sdt = r.sdt, smt = r.smt, sol = r.sol, usdc = r.usdc)
 
     return balance
-
-
-
-
-# def update_speed_limit():
-#     road_infos = session.query(ROAD_INFO).all()
-
-#     for road in road_infos:
-#         road_type = road.road_type
-#         if road_type == 101:
-#             road.speed_limit = 100
-#         elif road_type == 102:
-#             road.speed_limit = 80
-#         else :
-#             road.speed_limit = 50
-#     session.commit()
-# create_user("deankang", "BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa")
-# create_balances("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa")
-# print(query_user_balance("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa"))
-
-# update_speed_limit()

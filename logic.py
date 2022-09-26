@@ -1,3 +1,4 @@
+from lib2to3.pgen2.driver import Driver
 import math
 import requests
 from typing import List
@@ -5,13 +6,12 @@ from loguru import logger
 from db import engineconn
 from dbmongo import check_ramp
 from schema import ROAD_INFO, NFT_INFO, DRIVE_RECORD, USER_BALANCE, DRIVE_HISTORY
-from model import Road
+from model import Road, Result
 from fastapi import HTTPException
 import time
-
+import copy
 CHECK_INTERVAL = 2
-# ROAD_RANK = {101: ("고속도로", 100), 102: ("도시고속화도로", 80), 103: ("일반국도", 50),
-#              104: ("특별/광역시도", 50), 105: ("국가지원지방도", 50), 106: ("지방도", 50), 107: ("시군도", 50)}
+
 
 engine = engineconn()
 session = engine.session_maker()
@@ -22,8 +22,12 @@ Rarity = {"common": 1, "rare": 1.3, "unique": 1.5, "legend": 1.7}
 city_high = {"내부순환도로", "강변북로", "동부간선도로", "북부간선도로", "올림픽대로", "김포한강로", "서부간선도로", "강남순환도시고속도로", "분당내곡간도시고속화도로",
              "분당수서로", "충장대로", "동서고가로", "관문대로", "번영로", "광안대로", "신천대로", "제2순환도로", "천변도시고속도로", "수석호평도시고속도로", "덕내로", "비봉매송도시고속도로"}
 
-high_way = {"세종포천고속도로", "서울외곽순환고속도로", "경인고속도로", "인천국제공항고속도로", "서해안고속도로", "경부고속도로", "용인서울고속도로", "서울양양고속도로",  "남해고속도로",  "부산외곽순환고속도로", "울산포항고속도로",  "남해고속도로제2지선", "중앙고속도로", "익산포항고속도로",  "중부내륙고속도로지선", "중부내륙고속도로", "광주대구고속도로",  "제2경인고속도로",  "수도권제2순환고속도로", "영동고속도로", "호남고속도로", "고창담양고속도로", "무안광주고속도로",
-            "통영대전고속도로", "대전남부순환고속도로", "호남고속도로지선", "당진영덕고속도로", "울산고속도로", "동해고속도로", "수원광명고속도로", "평택제천고속도로", "평택화성고속도로", "평택시흥고속도로", "오산화성고속도로", "중부고속도로", "제2중부고속도로", "광주원주고속도로", "옥산오창고속도로", "논산천안고속도로", "서천공주고속도로",  "순천완주고속도로", "상주영천고속도로",  "중앙고속도로지선",  "남해고속도로제3지선",  "남해고속도로제1지선"}
+high_way = {"세종포천고속도로", "서울외곽순환고속도로", "경인고속도로", "인천국제공항고속도로", "서해안고속도로", "경부고속도로", "용인서울고속도로", "서울양양고속도로",
+            "남해고속도로",  "부산외곽순환고속도로", "울산포항고속도로",  "남해고속도로제2지선", "중앙고속도로", "익산포항고속도로",  "중부내륙고속도로지선", "중부내륙고속도로",
+            "광주대구고속도로",  "제2경인고속도로",  "수도권제2순환고속도로", "영동고속도로", "호남고속도로", "고창담양고속도로", "무안광주고속도로",
+            "통영대전고속도로", "대전남부순환고속도로", "호남고속도로지선", "당진영덕고속도로", "울산고속도로", "동해고속도로", "수원광명고속도로", "평택제천고속도로", "평택화성고속도로",
+            "평택시흥고속도로", "오산화성고속도로", "중부고속도로", "제2중부고속도로", "광주원주고속도로", "옥산오창고속도로", "논산천안고속도로", "서천공주고속도로",  "순천완주고속도로",
+            "상주영천고속도로",  "중앙고속도로지선",  "남해고속도로제3지선",  "남해고속도로제1지선"}
 
 
 def check_road(lat: float, lon: float) -> str:
@@ -36,21 +40,41 @@ def check_road(lat: float, lon: float) -> str:
 
 
 # 현재 속도 계산
-
-
 def calcSpeed(before: List, after: List) -> tuple:
-    distance = calcDistance(before, after)
+    distance = calc_distance(before, after)
     speed = distance * 3600 / CHECK_INTERVAL
     return round(speed, 1), distance
 
 
 # 이전 위치에서 이동한 거리 계산
-def calcDistance(before: List, after: List) -> float:
+def calc_distance(before: List, after: List) -> float:
     theta = before[1] - after[1]
     dist = math.sin(deg2rad(before[0])) * math.sin(deg2rad(after[0])) + math.cos(
         deg2rad(before[0])) * math.cos(deg2rad(after[0])) * math.cos(deg2rad(theta))
     dist = rad2deg(math.acos(dist)) * 60 * 1.1515 * 1.609344
     return dist
+
+
+# nft 소모량 계산
+def calc_decrease_amount(_mining_rate: float, _distance: str, _damage_factor: float, _adj: float, _c: int, _total_nft_usage: float, _nft_durability: float) -> float:
+    decrease_amount = round(
+        ((pow(_mining_rate * _distance, _c) * 1 * 1 / _adj) * _damage_factor), 3)
+
+    if _total_nft_usage + decrease_amount >= _nft_durability:
+        return round(abs(_nft_durability - _total_nft_usage), 3)
+
+    return decrease_amount
+
+
+# calc mining amount
+def calc_mining(_wallet: str, _distance: float, _current_speed: float, _speed_limit: float) -> float:
+    mining_rate = 1  # per km
+    c = 1
+    adj, durability = get_equipped_nft_info(_wallet)  # td
+    v = is_violate(_current_speed, _speed_limit)
+    amount = pow((mining_rate * _distance), c) * durability * v * adj
+    amount = round(amount, 3)
+    return amount
 
 
 def deg2rad(deg: float) -> float:
@@ -59,6 +83,10 @@ def deg2rad(deg: float) -> float:
 
 def rad2deg(rad: float) -> float:
     return (rad * 180 / math.pi)
+
+
+def get_unix_time_stamp() -> int:
+    return round(time.time())
 
 
 # 현재 도로 위치 반환 ex) 올림픽대로
@@ -81,12 +109,23 @@ def on_road(locations: List) -> str:
     return current_location
 
 
-# 시 단위 현재 위치 파악
-def check_city(lat: float, lon: float) -> str:
-    request_url = "http://localhost:8080/reverse?format=json&addressdetails=1&zoom=14&"
-    url_param = "lon=" + str(lon) + "&lat="+str(lat)
-    response = requests.get(request_url + url_param).json()
-    return response['address']['city']
+# return adj, duability
+def get_equipped_nft_info(_wallet: str) -> tuple:
+    query = session.query(NFT_INFO).filter(
+        NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == 1).all()
+    result = [(q.rarity, q.max_durability, q.current_durability)for q in query]
+    rr = Rarity[result[0][0]]
+    mx = result[0][1]
+    cr = result[0][2]
+    if len(result) == 0:
+        raise HTTPException(status_code=404, detail="NFT NOT FOUND")
+
+    return (rr, cr / mx)
+
+
+# 속도 위반 체크
+def is_violate(_current_speed: float, _speed_limit: float) -> int:
+    return 1 if _current_speed <= _speed_limit else 0
 
 
 # 현재 시 위치, 도로 명에 맞는 type 반
@@ -95,6 +134,24 @@ def query_road_type(road_name: str, city: str) -> list:
         ROAD_INFO.road_name.like(road_name)).filter(ROAD_INFO.region.like(city))
     result = [i.road_type for i in query]
     return result
+
+
+# 시 단위 현재 위치 파악
+def check_city(lat: float, lon: float) -> str:
+    request_url = "http://localhost:8080/reverse?format=json&addressdetails=1&zoom=14&"
+    url_param = "lon=" + str(lon) + "&lat="+str(lat)
+    response = requests.get(request_url + url_param).json()
+    return response['address']['city']
+
+
+# 현재 진행 중인 게임이 있는지 확인
+def check_running_game(_wallet: str) -> None:
+    query = session.query(DRIVE_RECORD).filter(
+        DRIVE_RECORD.user == _wallet).filter(DRIVE_RECORD.end_at == None).all()
+
+    # 이미 진행 중인 게임이 존재하는지
+    if len(query) > 0:
+        raise HTTPException(status_code=405, detail="ALREADY RUNNING GAME")
 
 
 # 제한 속도 체크
@@ -148,7 +205,7 @@ def check_highway_or_general(_road_types: list) -> int:
 
 
 # main function
-def check_status(locations: List, _user: str, _start_at: int) -> dict:
+def check_status(locations: List, _user: str, _start_at: int) -> Road:
     location = on_road(locations)  # 현재 도로명
     speed, distance = calcSpeed(locations[-2], locations[-1])  # 속도
     distance = round(distance, 3)
@@ -175,43 +232,15 @@ def check_status(locations: List, _user: str, _start_at: int) -> dict:
     return response
 
 
-def get_unix_time_stamp() -> int:
-    return round(time.time())
-
-
-# 현재 진행 중인 게임이 있는지 확인
-def check_running_game(_wallet: str) -> None:
-    query = session.query(DRIVE_RECORD).filter(
-        DRIVE_RECORD.user == _wallet).filter(DRIVE_RECORD.end_at == None).all()
-
-    # 이미 진행 중인 게임이 존재하는지
-    if len(query) > 0:
-        raise HTTPException(status_code=405, detail="ALREADY RUNNING GAME")
-
-
-# 게임 시작
-def start_game(_wallet: str) -> int:
-    check_running_game(_wallet)  # 게임 진행중인지 체크
-    query = session.query(NFT_INFO).filter(
-        NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == True).all()
-    if len(query) == 0:
-        raise HTTPException(405, "NO NFT EQUIPED")
-    [q] = query
-
-    _start_at = get_unix_time_stamp()
-
-    dr = DRIVE_RECORD(user=_wallet, start_at=_start_at, end_at=None, driving_distance=0,
-                      safe_driving_distance=0, mining_distance=0, total_mining=0, running_time=0, nft_rarity=q.rarity, nft_usage=0.0)
-    session.add(dr)
-    session.commit()
-
-    return _start_at
-
-
 # 게임이 진행 중 일 때 지속적으로 테이블 업데이트
 def update_record(_wallet: str, _current_speed: float, _speed_limit: float, _start_at: int, _driving_distance: float, _adj: float) -> tuple:
     # 속도 위반 여부
     violation = is_violate(_current_speed, _speed_limit)
+
+    q1 = session.query(NFT_INFO).filter(
+        NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == True).all()
+    [qq] = q1
+    current_nft_durability = qq.current_durability
 
     # 게임 기록
     query = session.query(DRIVE_RECORD).filter(DRIVE_RECORD.user == _wallet).filter(
@@ -230,7 +259,8 @@ def update_record(_wallet: str, _current_speed: float, _speed_limit: float, _sta
     mining_amount = calc_mining(
         _wallet, valid_distance, _current_speed, _speed_limit)
 
-    nft_usage = calc_decrease_amount(1, valid_distance, 0.2, _adj, 1)
+    nft_usage = calc_decrease_amount(1, valid_distance, 0.2, _adj, 1, copy.deepcopy(
+        q.nft_usage), current_nft_durability)
 
     q.driving_distance += _driving_distance
     q.safe_driving_distance += safe_driving_distance
@@ -242,46 +272,26 @@ def update_record(_wallet: str, _current_speed: float, _speed_limit: float, _sta
     return safe_driving_distance, valid_distance, mining_amount, nft_usage
 
 
-def calc_decrease_amount(_mining_rate: float, _distance: str, _damage_factor: float, _adj: float, _c: int) -> float:
-    decrease_amount = round(
-        ((pow(_mining_rate * _distance, _c) * 1 * 1 / _adj) * _damage_factor), 3)
-    logger.debug(str(_mining_rate) + " " + str(_distance) + " " +
-                 str(_damage_factor) + " " + str(_adj) + " " + str(_c))
-    return decrease_amount
-
-
-# return adj, duability
-def get_equipped_nft_info(_wallet: str) -> tuple:
+# 게임 시작
+def start_game(_wallet: str) -> int:
+    check_running_game(_wallet)  # 게임 진행중인지 체크
     query = session.query(NFT_INFO).filter(
-        NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == 1).all()
-    result = [(q.rarity, q.max_durability, q.current_durability)for q in query]
-    rr = Rarity[result[0][0]]
-    mx = result[0][1]
-    cr = result[0][2]
-    if len(result) == 0:
-        raise HTTPException(status_code=404, detail="NFT NOT FOUND")
+        NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == True).all()
+    if len(query) == 0:
+        raise HTTPException(405, "NO NFT EQUIPED")
+    [q] = query
 
-    return (rr, cr / mx)
+    _start_at = get_unix_time_stamp()
 
-
-# 속도 위반 체크
-def is_violate(_current_speed: float, _speed_limit: float) -> int:
-    return 1 if _current_speed <= _speed_limit else 0
-
-
-# calc mining amount
-def calc_mining(_wallet: str, _distance: float, _current_speed: float, _speed_limit: float) -> float:
-    mining_rate = 1  # per km
-    c = 1
-    adj, durability = get_equipped_nft_info(_wallet)  # td
-    v = is_violate(_current_speed, _speed_limit)
-    amount = pow((mining_rate * _distance), c) * durability * v * adj
-    amount = round(amount, 3)
-    return amount
+    dr = DRIVE_RECORD(user=_wallet, start_at=_start_at, end_at=None, driving_distance=0,
+                      safe_driving_distance=0, mining_distance=0, total_mining=0, running_time=0, nft_rarity=q.rarity, nft_usage=0.0)
+    session.add(dr)
+    session.commit()
+    return _start_at
 
 
 # 게임 종료 / 유저 잔고, nft 내구도 감소
-def end_game(_wallet: str, _start_at: int):
+def end_game(_wallet: str, _start_at: int) -> Result:
     query = session.query(DRIVE_RECORD).filter(
         DRIVE_RECORD.start_at == _start_at).filter(DRIVE_RECORD.user == _wallet).all()
     if len(query) == 0:
@@ -327,26 +337,4 @@ def end_game(_wallet: str, _start_at: int):
 
     session.commit()
 
-
-# def query_duplicate():
-#     response = session.query(ROAD_INFO.road_name, text("duplicates")).from_statement(
-#         text("select road_name, count(road_name) as duplicates from road_info group by road_name having count(road_name) > 1")).all()
-#     result = [r[0] for r in response]
-
-#     return result
-
-
-# def check_duplicate():
-#     duplicates = query_duplicate()
-
-#     for name in duplicates:
-#         response = query_road_type(name)
-#         if 101 in response or 102 in response:
-#             s = [str(r) for r in response]
-#             print(name + " : " + ' '.join(s))
-
-
-# locs = [[37.515263, 126.952187], [
-#     37.515221, 126.952502], [37.515110, 126.952901]]
-# check_status(locs, "BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa", 1663904375)
-# end_game("BZqkHr5uwTUQpPqgLSr5erWDhx4VHz4DzN98fNsUVwwa", 1663904375)
+    return Result(user=_wallet, start_at=history.start_at, end_at=history.end_at, driving_distance=history.driving_distance, safe_driving_distance=history.safe_driving_distance, mining_distance=history.mining_distance, total_mining=history.total_mining, total_nft_usage=history.nft_usage, running_time=history.running_time)
