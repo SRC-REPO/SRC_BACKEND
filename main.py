@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from model import Result, Road, Balance
 from user import query_user_balance
 import fastapi
-
 from logic import check_status, start_game, end_game
 
 app = fastapi.FastAPI()

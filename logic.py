@@ -30,8 +30,8 @@ high_way = {"세종포천고속도로", "서울외곽순환고속도로", "경�
             "상주영천고속도로",  "중앙고속도로지선",  "남해고속도로제3지선",  "남해고속도로제1지선"}
 
 
-def check_road(lat: float, lon: float) -> str:
-    request_url = "http://localhost:5000/nearest/v1/driving/"
+def check_road(lat: float, lon: float) -> str:ehzj
+    request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
     param = str(lon)+","+str(lat)
     number = "?number="+str(3)
     response = requests.get(request_url+param+number).json()
@@ -138,7 +138,7 @@ def query_road_type(road_name: str, city: str) -> list:
 
 # 시 단위 현재 위치 파악
 def check_city(lat: float, lon: float) -> str:
-    request_url = "http://localhost:8080/reverse?format=json&addressdetails=1&zoom=14&"
+    request_url = "http://49.247.31.91/nominatim/reverse?format=json&addressdetails=1&zoom=14&"
     url_param = "lon=" + str(lon) + "&lat="+str(lat)
     response = requests.get(request_url + url_param).json()
     return response['address']['city']
