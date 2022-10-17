@@ -35,7 +35,7 @@ def create_user(_nick_name: str, _wallet: str) -> bool:
 
 # 잔고 초기화
 def create_balances(_wallet: str) -> bool:
-    session.add(USER_BALANCE(wallet=_wallet, sdt = 0, smt = 0, sol = 0, usdc =0))
+    session.add(USER_BALANCE(wallet=_wallet, sdt=0, smt=0, sol=0, usdc=0))
     session.commit()
 
     return True
@@ -50,11 +50,13 @@ def create_session(_wallet: str, _session: str) -> bool:
 
 # 유저 잔고 조회
 def query_user_balance(_wallet: str) -> Balance:
-    result = session.query(USER_BALANCE).filter(USER_BALANCE.wallet == _wallet).all()
+    result = session.query(USER_BALANCE).filter(
+        USER_BALANCE.wallet == _wallet).all()
     if len(result) == 0:
         raise HTTPException(404, "NO USER FOUND")
-    
+
     [r] = result
-    balance = Balance(wallet = r.wallet, sdt = r.sdt, smt = r.smt, sol = r.sol, usdc = r.usdc)
+    balance = Balance(wallet=r.wallet, sdt=r.sdt,
+                      smt=r.smt, sol=r.sol, usdc=r.usdc)
 
     return balance
