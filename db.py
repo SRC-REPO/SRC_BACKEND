@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 
 app = {
     'name': 'mysql+pymysql',
-    'user': 'root',
-    'password': 'xorms123',
+    'user': 'src',
+    'password': 'src_sql',
     'host': 'localhost',
     'dbconn': 'src',
     'port': 3306

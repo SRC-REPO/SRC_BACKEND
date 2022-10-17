@@ -30,7 +30,7 @@ high_way = {"세종포천고속도로", "서울외곽순환고속도로", "경�
             "상주영천고속도로",  "중앙고속도로지선",  "남해고속도로제3지선",  "남해고속도로제1지선"}
 
 
-def check_road(lat: float, lon: float) -> str:ehzj
+def check_road(lat: float, lon: float) -> str:
     request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
     param = str(lon)+","+str(lat)
     number = "?number="+str(3)
