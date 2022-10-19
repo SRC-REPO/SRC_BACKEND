@@ -49,18 +49,10 @@ class USER_BALANCE(Base):
     __tablename__ = "user_balance"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
     wallet = Column(VARCHAR,  ForeignKey("user_info.wallet"))
-<<<<<<< HEAD
     sdt = Column(BIGINT, nullable=False )
     smt = Column(BIGINT, nullable=False)
     sol = Column(BIGINT, nullable=False)
     usdc = Column(BIGINT, nullable=False)
-=======
-    sdt = Column(BIGINT, nullable=False)
-    smt = Column(BIGINT, nullable=False)
-    sol = Column(BIGINT, nullable=False)
-    usdc = Column(BIGINT, nullable=False)
-
->>>>>>> 8b497db7747e2e72e3b21b107e0581eba06b6959
 
 class DRIVE_RECORD(Base):
     __tablename__ = "drive_record"
