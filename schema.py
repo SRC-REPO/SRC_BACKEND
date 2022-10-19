@@ -1,4 +1,4 @@
-from sqlalchemy import Column, VARCHAR, INT, ForeignKey, BOOLEAN, FLOAT
+from sqlalchemy import Column, VARCHAR, INT, ForeignKey, BOOLEAN, FLOAT, BIGINT
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -49,10 +49,10 @@ class USER_BALANCE(Base):
     __tablename__ = "user_balance"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
     wallet = Column(VARCHAR,  ForeignKey("user_info.wallet"))
-    sdt = Column(INT, nullable=False )
-    smt = Column(INT, nullable=False)
-    sol = Column(INT, nullable=False)
-    usdc = Column(INT, nullable=False)
+    sdt = Column(BIGINT, nullable=False )
+    smt = Column(BIGINT, nullable=False)
+    sol = Column(BIGINT, nullable=False)
+    usdc = Column(BIGINT, nullable=False)
 
 class DRIVE_RECORD(Base):
     __tablename__ = "drive_record"

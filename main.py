@@ -1,5 +1,6 @@
 from http.client import HTTPResponse
 from typing import List
+from loguru import logger
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from model import Result, Road, Balance
@@ -52,7 +53,7 @@ def connect():
 @app.post("/start")
 def start(start: Start):
     start_time = start_game(start.user)
-    return {"message": "game started", "user" : start.user, "start_at": start_time}
+    return {"message": "game started", "user": start.user, "start_at": start_time}
 
 
 # 진행 중
