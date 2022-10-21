@@ -4,7 +4,6 @@ import requests
 from typing import List
 from loguru import logger
 from db import engineconn
-from dbmongo import check_ramp
 from schema import ROAD_INFO, NFT_INFO, DRIVE_RECORD, USER_BALANCE, DRIVE_HISTORY
 from model import Road, Result
 from fastapi import HTTPException

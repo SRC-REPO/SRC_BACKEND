@@ -72,3 +72,4 @@ def stop(stop: Stop):
 @app.post("/user/balance", response_model=Balance)
 def get_balance(user: User):
     return query_user_balance(user.user)
+
