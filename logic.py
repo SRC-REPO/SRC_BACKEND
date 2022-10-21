@@ -1,5 +1,6 @@
 from lib2to3.pgen2.driver import Driver
 import math
+from signal import raise_signal
 import requests
 from typing import List
 from loguru import logger
@@ -150,8 +151,17 @@ def check_running_game(_wallet: str) -> None:
 
     # 이미 진행 중인 게임이 존재하는지
     if len(query) > 0:
-        raise HTTPException(status_code=405, detail="ALREADY RUNNING GAME")
+        raise HTTPException(status_code=403, detail="ALREADY RUNNING GAME")
 
+def check_24h(_wallet : str) -> None:
+    current = get_unix_time_stamp()
+    before_24h = current - 86400
+    
+    result = session.query(DRIVE_HISTORY).filter(DRIVE_HISTORY.user == _wallet).filter(DRIVE_HISTORY.end_at > before_24h).all()
+    
+    if len(result) > 0:
+        raise HTTPException(status_code=403, detail="NOT FULFILL 24H COOLTIME")
+    
 
 # 제한 속도 체크
 def check_speed_limit(_road_types: list, _road_name: str, _lat: float, _lon: float) -> int:
@@ -274,6 +284,7 @@ def update_record(_wallet: str, _current_speed: float, _speed_limit: float, _sta
 # 게임 시작
 def start_game(_wallet: str) -> int:
     check_running_game(_wallet)  # 게임 진행중인지 체크
+    check_24h(_wallet)
     query = session.query(NFT_INFO).filter(
         NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == True).all()
     if len(query) == 0:

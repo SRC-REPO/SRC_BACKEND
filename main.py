@@ -3,8 +3,8 @@ from typing import List
 from loguru import logger
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from model import Result, Road, Balance
-from user import query_user_balance
+from model import *
+from user import *
 import fastapi
 from logic import check_status, start_game, end_game
 
@@ -66,10 +66,15 @@ def check(loc: Loc):
 def stop(stop: Stop):
     return end_game(stop.user, stop.start_at)
 
+
 # 유저 잔고 조회
-
-
 @app.post("/user/balance", response_model=Balance)
 def get_balance(user: User):
     return query_user_balance(user.user)
 
+
+# today status
+@app.post("/user/today", response_model=Today)
+def get_toady_status(user: User):
+
+    return get_today_user_status(user.user)

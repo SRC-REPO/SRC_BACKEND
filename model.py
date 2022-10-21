@@ -33,3 +33,12 @@ class Balance(BaseModel):
     smt: int
     sol: int
     usdc: int
+
+
+class Today(BaseModel):
+    wallet : str
+    rewarded_distance : float
+    reward : float
+    max_rewarded_distance : float
+    max_reward : float
+    last_drive: int

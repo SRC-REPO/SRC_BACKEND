@@ -11,6 +11,7 @@ app = {
     'port': 3306
 }
 
+
 conn_string = f'{app["name"]}://{app["user"]}:{app["password"]}@{app["host"]}:{app["port"]}/{app["dbconn"]}'
 
 
