@@ -54,6 +54,7 @@ class USER_BALANCE(Base):
     sol = Column(BIGINT, nullable=False)
     usdc = Column(BIGINT, nullable=False)
 
+#Live session
 class DRIVE_RECORD(Base):
     __tablename__ = "drive_record"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
@@ -68,7 +69,7 @@ class DRIVE_RECORD(Base):
     nft_rarity = Column(VARCHAR, nullable=False)
     nft_usage = Column(FLOAT, nullable=False)
 
-
+#List of finished DRIVE_RECORD
 class DRIVE_HISTORY(Base):
     __tablename__ = "drive_history"
     idx = Column(INT, nullable=False, autoincrement=True, primary_key=True)
