@@ -115,7 +115,7 @@ def get_today_user_status(_wallet: str) -> Today:
     # 오늘 운전기록 없으면 None return
     if len(result) == 0:
         # raise HTTPException(404, "NO DRIVE HISTORY")
-        return None
+        return Today(wallet=_wallet, rewarded_distance=0, reward=0, max_rewarded_distance=20, max_reward=20, last_drive=None)
 
     # DRIVE_HISTORY 룹 돌면서 mining_distance와 mining_tokens 를 합산
     for row in result:

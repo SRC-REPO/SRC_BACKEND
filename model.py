@@ -1,5 +1,6 @@
 
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class Road(BaseModel):
@@ -41,4 +42,4 @@ class Today(BaseModel):
     reward : float
     max_rewarded_distance : float
     max_reward : float
-    last_drive: int
+    last_drive: datetime
