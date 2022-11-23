@@ -27,13 +27,13 @@ Rarity = {"base": 1.0,
 "level9":1.0,
 "level10":1.0}
 
-def check_road(lat: float, lon: float) -> str:
-    request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
-    param = str(lon)+","+str(lat)
-    number = "?number="+str(3)
-    response = requests.get(request_url+param+number).json()
-    road_name = response['waypoints'][0]['name']
-    return road_name
+# def check_road(lat: float, lon: float) -> str:
+#     request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
+#     param = str(lon)+","+str(lat)
+#     number = "?number="+str(3)
+#     response = requests.get(request_url+param+number).json()
+#     road_name = response['waypoints'][0]['name']
+#     return road_name
 
 
 # 현재 속도 계산
@@ -134,11 +134,11 @@ def query_road_type(road_name: str, city: str) -> list:
 
 
 # 시 단위 현재 위치 파악
-def check_city(lat: float, lon: float) -> str:
-    request_url = "http://49.247.31.91/nominatim/reverse?format=json&addressdetails=1&zoom=14&"
-    url_param = "lon=" + str(lon) + "&lat="+str(lat)
-    response = requests.get(request_url + url_param).json()
-    return response['address']['city']
+# def check_city(lat: float, lon: float) -> str:
+#     request_url = "http://49.247.31.91/nominatim/reverse?format=json&addressdetails=1&zoom=14&"
+#     url_param = "lon=" + str(lon) + "&lat="+str(lat)
+#     response = requests.get(request_url + url_param).json()
+#     return response['address']['city']
 
 
 # 현재 진행 중인 게임이 있는지 확인
@@ -149,65 +149,40 @@ def check_running_game(_wallet: str) -> None:
     # 이미 진행 중인 게임이 존재하는지
     if len(query) > 0:
         raise HTTPException(status_code=403, detail="ALREADY RUNNING GAME")
-
-def check_24h(_wallet : str) -> None:
-    current = get_unix_time_stamp()
-    before_24h = current - 86400
-    
-    result = session.query(DRIVE_HISTORY).filter(DRIVE_HISTORY.user == _wallet).filter(DRIVE_HISTORY.end_at > before_24h).all()
-    
-    if len(result) > 0:
-        raise HTTPException(status_code=403, detail="NOT FULFILL 24H COOLTIME")
     
 
 # 제한 속도 체크
 def check_speed_limit(_road_types: list, _road_name: str, _lat: float, _lon: float) -> int:
-    road_type = check_highway_or_general(_road_types)
-    ramp = -1
-    if ramp == -1:
-        if road_type == 2:
-            return 100
-        elif road_type == 1:
-            return 80
-        elif road_type == 0:
-            return 50
-        elif _road_name in city_high:
-            return 80
-        elif _road_name in high_way:
-            return 100
-        else:
-            return 50
-    else:
-        return ramp
+    return
 
 
-#  고속도로 2 고속화도로 1 국도 0 중복 -1
-def check_highway_or_general(_road_types: list) -> int:
-    if _road_types == []:
-        raise HTTPException(status_code=404, detail="NO ROAD_TYPES FOUND")
-    r_type = {"general": 0, "high": 0, "city": 0}
+# #  고속도로 2 고속화도로 1 국도 0 중복 -1
+# def check_highway_or_general(_road_types: list) -> int:
+#     if _road_types == []:
+#         raise HTTPException(status_code=404, detail="NO ROAD_TYPES FOUND")
+#     r_type = {"general": 0, "high": 0, "city": 0}
 
-    general_road = [103, 104, 105, 106, 107]
-    high_way = [101]
-    city_high_way = [102]
+#     general_road = [103, 104, 105, 106, 107]
+#     high_way = [101]
+#     city_high_way = [102]
 
-    for road_type in _road_types:
-        if road_type in general_road:
-            r_type["general"] = r_type["general"] + 1
-        elif road_type in high_way:
-            r_type["high"] = r_type["high"] + 1
-        elif road_type in city_high_way:
-            r_type["city"] = r_type["city"] + 1
-    logger.debug(_road_types)
+#     for road_type in _road_types:
+#         if road_type in general_road:
+#             r_type["general"] = r_type["general"] + 1
+#         elif road_type in high_way:
+#             r_type["high"] = r_type["high"] + 1
+#         elif road_type in city_high_way:
+#             r_type["city"] = r_type["city"] + 1
+#     logger.debug(_road_types)
 
-    if r_type["high"] > 0 and r_type["city"] == 0 and r_type["general"] == 0:
-        return 2
-    elif r_type["city"] > 0 and r_type["high"] == 0 and r_type["general"] == 0:
-        return 1
-    elif r_type["general"] > 0 and r_type["high"] == 0 and r_type["city"] == 0:
-        return 0
-    else:
-        return -1
+#     if r_type["high"] > 0 and r_type["city"] == 0 and r_type["general"] == 0:
+#         return 2
+#     elif r_type["city"] > 0 and r_type["high"] == 0 and r_type["general"] == 0:
+#         return 1
+#     elif r_type["general"] > 0 and r_type["high"] == 0 and r_type["city"] == 0:
+#         return 0
+#     else:
+#         return -1
 
 
 # main function
