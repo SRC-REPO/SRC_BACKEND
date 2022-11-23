@@ -16,16 +16,16 @@ engine = engineconn()
 session = engine.session_maker()
 
 # To be adjusted
-Rarity = {"base": 1.05, 
-"safe_driver": 1.10, 
-"accident_free": 1.15, 
-"instructor": 1.20,
-"level5":1.25,
-"level6":1.30,
-"level7":1.35,
-"level8":1.40,
-"level9":1.45,
-"level10":1.50}
+Rarity = {"base": 1.0, 
+"safe_driver": 1.0, 
+"accident_free": 1.0, 
+"instructor": 1.0,
+"level5":1.0,
+"level6":1.0,
+"level7":1.0,
+"level8":1.0,
+"level9":1.0,
+"level10":1.0}
 
 def check_road(lat: float, lon: float) -> str:
     request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
