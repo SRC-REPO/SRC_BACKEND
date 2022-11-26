@@ -10,13 +10,13 @@ from model import Road, Result
 from fastapi import HTTPException
 import time
 import copy
-CHECK_INTERVAL = 2
+CHECK_INTERVAL = 1 #sec
 
 engine = engineconn()
 session = engine.session_maker()
 
 # To be adjusted
-Rarity = {"base": 1.0, 
+RarityAdjustment = {"base": 1.0, 
 "safe_driver": 1.0, 
 "accident_free": 1.0, 
 "instructor": 1.0,
@@ -27,17 +27,25 @@ Rarity = {"base": 1.0,
 "level9":1.0,
 "level10":1.0}
 
-# def check_road(lat: float, lon: float) -> str:
-#     request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
-#     param = str(lon)+","+str(lat)
-#     number = "?number="+str(3)
-#     response = requests.get(request_url+param+number).json()
-#     road_name = response['waypoints'][0]['name']
-#     return road_name
+def check_road(lat: float, lon: float) -> str:
+    request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
+    param = str(lon)+","+str(lat)
+    number = "?number="+str(2)
+    response = requests.get(request_url+param+number).json()
+    road_name = response['waypoints'][0]['name']
+    return road_name
+
+def get_road_node(lat: float, lon: float) -> str:
+    request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
+    param = str(lon)+","+str(lat)
+    number = "?number="+str(2)
+    response = requests.get(request_url+param+number).json()
+    node = response['waypoints'][0]['nodes'] #list ['node1', 'node2']
+    return node[0]
 
 
 # 현재 속도 계산
-def calcSpeed(before: List, after: List) -> tuple:
+def calc_speed(before: List, after: List) -> tuple:
     distance = calc_distance(before, after)
     speed = distance * 3600 / CHECK_INTERVAL
     return round(speed, 1), distance
@@ -51,14 +59,35 @@ def calc_distance(before: List, after: List) -> float:
     dist = rad2deg(math.acos(dist)) * 60 * 1.1515 * 1.609344
     return dist
 
+# Daily mining distance cap 도달 여부
+def is_reach_daily_limit_mining_distance(_wallet: str, _daily_cap_mining_distance: float) -> bool:
+    dt = date.today()
+    print(datetime.combine(dt, datetime.min.time()))    
+    # 오늘 00:00분
+    midnight_behind = datetime.combine(dt, datetime.min.time())
 
-# nft 소모량 계산
+    query_h = session.query(DRIVE_HISTORY).filter(
+        DRIVE_HISTORY.end_at > midnight_behind).filter(DRIVE_HISTORY.user == _wallet).all()
+    mining_distance_history = query_h.mining_distance
+    query_a = session.query(DRIVE_RECORD).filter(DRIVE_RECORD.user == _wallet).one()
+    mining_distance_active = query_a.mining_distance
+
+    if mining_distance_history + mining_distance_active < _daily_cap_mining_distance:
+        return False
+    else:
+        return True
+
+
+# nft mining distance 소모량 = mining distance
+
+# nft durability 소모량 계산. 에너지 소모량 = 채굴*_damage_factor
 def calc_decrease_amount(_mining_rate: float, _distance: str, _damage_factor: float, _adj: float, _c: int, _total_nft_usage: float, _nft_durability: float) -> float:
+
     decrease_amount = round(
-        ((pow(_mining_rate * _distance, _c) * 1 * 1 / _adj) * _damage_factor), 3)
+        (pow(_mining_rate * _distance, _c) * 1 * 1 / _adj) * _damage_factor, 1)
 
     if _total_nft_usage + decrease_amount >= _nft_durability:
-        return round(abs(_nft_durability - _total_nft_usage), 3)
+        return round(abs(_nft_durability - _total_nft_usage), 1)
 
     return decrease_amount
 
@@ -111,13 +140,23 @@ def get_equipped_nft_info(_wallet: str) -> tuple:
     query = session.query(NFT_INFO).filter(
         NFT_INFO.owner == _wallet).filter(NFT_INFO.equip == 1).all()
     result = [(q.rarity, q.max_durability, q.current_durability)for q in query]
-    rr = Rarity[result[0][0]]
+    rr = RarityAdjustment[result[0][0]]
     mx = result[0][1]
     cr = result[0][2]
     if len(result) == 0:
         raise HTTPException(status_code=404, detail="NFT NOT FOUND")
 
-    return (rr, cr / mx)
+    # This should be evaluated on the fly
+    if cr <= 30:
+        reduction_factor = 0.3
+    elif cr <= 50:
+        reduction_factor = 0.5
+    elif cr <= 70:
+        reduction_factor = 0.7
+    else
+        reduction_factor = 1.0
+
+    return (rr, reduction_factor)
 
 
 # 속도 위반 체크
@@ -188,7 +227,7 @@ def check_speed_limit(_road_types: list, _road_name: str, _lat: float, _lon: flo
 # main function
 def check_status(locations: List, _user: str, _start_at: int) -> Road:
     location = on_road(locations)  # 현재 도로명
-    speed, distance = calcSpeed(locations[-2], locations[-1])  # 속도
+    speed, distance = calc_speed(locations[-2], locations[-1])  # 속도
     distance = round(distance, 3)
     _lat, _lon = locations[-1]
     city = check_city(_lat, _lon)
@@ -243,6 +282,7 @@ def update_record(_wallet: str, _current_speed: float, _speed_limit: float, _sta
     nft_usage = calc_decrease_amount(1, valid_distance, 0.2, _adj, 1, copy.deepcopy(
         q.nft_usage), current_nft_durability)
 
+
     q.driving_distance += _driving_distance
     q.safe_driving_distance += safe_driving_distance
     q.mining_distance += valid_distance
@@ -272,7 +312,7 @@ def start_game(_wallet: str) -> int:
     return _start_at
 
 
-# 게임 종료 / 유저 잔고, nft 내구도 감소
+# 게임 종료 / 유저 잔고, nft 내구도 감소, nft 남은 채굴거리 소모
 def end_game(_wallet: str, _start_at: int) -> Result:
     query = session.query(DRIVE_RECORD).filter(
         DRIVE_RECORD.start_at == _start_at).filter(DRIVE_RECORD.user == _wallet).all()
@@ -316,6 +356,9 @@ def end_game(_wallet: str, _start_at: int) -> Result:
     [q2] = query2
     q2.current_durability = q2.current_durability - \
         drive_nft_usage if q2.current_durability >= drive_nft_usage else 0
+
+    # nft remaining_mining_distance 차감.
+    #
 
     session.commit()
 

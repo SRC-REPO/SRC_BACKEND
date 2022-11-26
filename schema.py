@@ -114,8 +114,8 @@ class DRIVE_HISTORY(Base):
     nft_number = Column(VARCHAR, nullable=False)
     #nft rarity
     nft_rarity = Column(VARCHAR, nullable=False)
-    #불필요. nft_info에 mining_distance 차감하면 됨.
-    #nft_usage = Column(FLOAT, nullable=False)
+    
+    nft_usage = Column(FLOAT, nullable=False)
 
 
 
