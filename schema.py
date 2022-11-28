@@ -27,7 +27,7 @@ class SpeedLimit(Base):
     speed_limit = Column(INTEGER, nullable = False, default = 0)
     #DB에 생성한 timestamp
     created_at = Column(DateTime, default=datetime.now, nullable = True)
-
+    updated_at = Column(DateTime, default=datetime.now, nullable = True)
 
 class CHILD_PROTECTION_ROAD(Base):
     __tablename__ = "child_protection_road"
@@ -35,6 +35,8 @@ class CHILD_PROTECTION_ROAD(Base):
     name = Column(VARCHAR, nullable=False)
     road_name = Column(VARCHAR, nullable=False)
     region = Column(VARCHAR, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable = True)
+    updated_at = Column(DateTime, default=datetime.now, nullable = True)
 
 
 class USER_INFO(Base):
@@ -49,6 +51,8 @@ class USER_INFO(Base):
     nft_info = relationship("NFT_INFO")
     drive_record = relationship("DRIVE_RECORD")
     drive_history = relationship("DRIVE_HISTORY")
+    created_at = Column(DateTime, default=datetime.now, nullable = True)
+    updated_at = Column(DateTime, default=datetime.now, nullable = True)
 
 
 class NFT_INFO(Base):
@@ -72,6 +76,8 @@ class NFT_INFO(Base):
     remaining_mining_distance = Column(FLOAT, nullable=False)
     #NFT user가 장착여부
     equip = Column(BOOLEAN, nullable=True)
+    created_at = Column(DateTime, default=datetime.now, nullable = True)
+    updated_at = Column(DateTime, default=datetime.now, nullable = True)
 
 
 class USER_BALANCE(Base):
@@ -87,6 +93,8 @@ class USER_BALANCE(Base):
     sol = Column(BIGINT, nullable=False)
     #USDC
     usdc = Column(BIGINT, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable = True)
+    updated_at = Column(DateTime, default=datetime.now, nullable = True)
 
 
 #List of finished DRIVE_RECORD
@@ -106,6 +114,8 @@ class DRIVE_HISTORY(Base):
     safe_driving_distance = Column(FLOAT, nullable=False)
     #채굴시도거리
     mining_distance = Column(FLOAT, nullable=False)
+    #보상성공거리
+    valid_mining_distance = Column(FLOAT, nullable=False)    
     #채굴량
     total_mining = Column(FLOAT, nullable=False)
     #운전시간
@@ -114,8 +124,10 @@ class DRIVE_HISTORY(Base):
     nft_number = Column(VARCHAR, nullable=False)
     #nft rarity
     nft_rarity = Column(VARCHAR, nullable=False)
-    
+    #에너지(타이어) 사용량
     nft_usage = Column(FLOAT, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable = True)
+    updated_at = Column(DateTime, default=datetime.now, nullable = True)
 
 
 

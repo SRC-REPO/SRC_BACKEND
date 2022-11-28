@@ -80,6 +80,7 @@ def is_reach_daily_limit_mining_distance(_wallet: str, _daily_cap_mining_distanc
 
 # nft mining distance 소모량 = mining distance
 
+
 # nft durability 소모량 계산. 에너지 소모량 = 채굴*_damage_factor
 def calc_decrease_amount(_mining_rate: float, _distance: str, _damage_factor: float, _adj: float, _c: int, _total_nft_usage: float, _nft_durability: float) -> float:
 
@@ -172,14 +173,6 @@ def query_road_type(road_name: str, city: str) -> list:
     return result
 
 
-# 시 단위 현재 위치 파악
-# def check_city(lat: float, lon: float) -> str:
-#     request_url = "http://49.247.31.91/nominatim/reverse?format=json&addressdetails=1&zoom=14&"
-#     url_param = "lon=" + str(lon) + "&lat="+str(lat)
-#     response = requests.get(request_url + url_param).json()
-#     return response['address']['city']
-
-
 # 현재 진행 중인 게임이 있는지 확인
 def check_running_game(_wallet: str) -> None:
     query = session.query(DRIVE_RECORD).filter(
@@ -210,36 +203,6 @@ def check_speed_limit(_road_node:str, _lat: float, _lon: float) -> int:
     # //else return -1 (no service)
 
     return
-
-
-# #  No need
-# #  고속도로 2 고속화도로 1 국도 0 중복 -1
-# def check_highway_or_general(_road_types: list) -> int:
-#     if _road_types == []:
-#         raise HTTPException(status_code=404, detail="NO ROAD_TYPES FOUND")
-#     r_type = {"general": 0, "high": 0, "city": 0}
-
-#     general_road = [103, 104, 105, 106, 107]
-#     high_way = [101]
-#     city_high_way = [102]
-
-#     for road_type in _road_types:
-#         if road_type in general_road:
-#             r_type["general"] = r_type["general"] + 1
-#         elif road_type in high_way:
-#             r_type["high"] = r_type["high"] + 1
-#         elif road_type in city_high_way:
-#             r_type["city"] = r_type["city"] + 1
-#     logger.debug(_road_types)
-
-#     if r_type["high"] > 0 and r_type["city"] == 0 and r_type["general"] == 0:
-#         return 2
-#     elif r_type["city"] > 0 and r_type["high"] == 0 and r_type["general"] == 0:
-#         return 1
-#     elif r_type["general"] > 0 and r_type["high"] == 0 and r_type["city"] == 0:
-#         return 0
-#     else:
-#         return -1
 
 
 # main function
