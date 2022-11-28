@@ -132,7 +132,7 @@ def is_violate(_current_speed: float, _speed_limit: float) -> int:
 def query_road_type(road_name: str, city: str) -> list:
     query = session.query(ROAD_INFO.road_type, ROAD_INFO.region).filter(
         ROAD_INFO.road_name.like(road_name)).filter(ROAD_INFO.region.like(city))
-    result = [i.road_type for i in query]
+    result = [i.road_type for i in query] if query else [103]
     return result
 
 
