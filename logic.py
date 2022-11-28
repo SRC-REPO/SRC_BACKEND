@@ -16,16 +16,16 @@ engine = engineconn()
 session = engine.session_maker()
 
 # To be adjusted
-RarityAdjustment = {"base": 1.0, 
-"safe_driver": 1.0, 
-"accident_free": 1.0, 
-"instructor": 1.0,
-"level5":1.0,
-"level6":1.0,
-"level7":1.0,
-"level8":1.0,
-"level9":1.0,
-"level10":1.0}
+RarityAdjustment = {"level1": 1.0, 
+"level2": 1.1, 
+"level3": 1.2, 
+"level4": 1.3,
+"level5":1.4,
+"level6":1.5,
+"level7":1.6,
+"level8":1.7,
+"level9":1.8,
+"level10":1.9}
 
 def check_road(lat: float, lon: float) -> str:
     request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
@@ -191,10 +191,28 @@ def check_running_game(_wallet: str) -> None:
     
 
 # 제한 속도 체크
-def check_speed_limit(_road_types: list, _road_name: str, _lat: float, _lon: float) -> int:
+def check_speed_limit(_road_node:str, _lat: float, _lon: float) -> int:
+    # //1) Flow: GPS -> speed limit. Doc https://www.notion.so/ver3-87e7175fc9e742a5a54da5299435fa43
+    # //1-1) api request http://49.247.31.91:5000/nearest/v1/driving/126.833489,37.525996?number=2
+    # //"waypoints":[{"nodes":[600579409,600579410],"location":[126.833506,37.52599],
+    # //take nodes[0]
+    # //
+    # //1-2) query nodes[0] in DB/src/speed_limit_south_korea
+    # //DB row: road name, road type (key=highway), speed limit.
+    # //If match and speed limit is non-zero, then return this value to 운전뷰 item 4
+    # //If match and speed limit is zero, return -1 (In front end app, it will display "No service")
+    # //If no match, proceed to 1-3)
+    # //
+    # //1-3) exception logic
+    # //http://49.247.31.91:12345/api/interpreter?data=[out:json];node(nodes[0]);<;out tag;
+    # //take value of the key "highway"
+    # //if value is residential, return 30  (30km 일괄적용)
+    # //else return -1 (no service)
+
     return
 
 
+# #  No need
 # #  고속도로 2 고속화도로 1 국도 0 중복 -1
 # def check_highway_or_general(_road_types: list) -> int:
 #     if _road_types == []:
