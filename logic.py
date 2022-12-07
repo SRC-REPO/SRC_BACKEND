@@ -16,16 +16,16 @@ engine = engineconn()
 session = engine.session_maker()
 
 # To be adjusted
-RarityAdjustment = {"level1": 1.0, 
-"level2": 1.1, 
-"level3": 1.2, 
-"level4": 1.3,
-"level5":1.4,
-"level6":1.5,
-"level7":1.6,
-"level8":1.7,
-"level9":1.8,
-"level10":1.9}
+RarityAdjustment = {"level1": 1.0,
+"level2": 1.0, 
+"level3": 1.0, 
+"level4": 1.0,
+"level5":1.0,
+"level6":1.0,
+"level7":1.0,
+"level8":1.0,
+"level9":1.0,
+"level10":1.0}
 
 def check_road(lat: float, lon: float) -> str:
     request_url = "http://49.247.31.91:5000/nearest/v1/driving/"
